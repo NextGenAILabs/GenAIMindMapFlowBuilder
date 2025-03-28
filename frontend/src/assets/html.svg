@@ -1,0 +1,11 @@
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- File shape with folded corner -->
+  <path d="M6 3H17L23 9V25C23 25.5523 22.5523 26 22 26H6C5.44772 26 5 25.5523 5 25V4C5 3.44772 5.44772 3 6 3Z"
+    stroke="#2ABCFF" stroke-width="2.333" stroke-linejoin="round"/>
+  <path d="M17 3V9H23" stroke="#2ABCFF" stroke-width="2.333" stroke-linejoin="round"/>
+
+  <!-- Properly centered "HTML" label -->
+  <text x="14" y="21.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="6" font-weight="bold" fill="#2ABCFF">
+    HTML
+  </text>
+</svg>
