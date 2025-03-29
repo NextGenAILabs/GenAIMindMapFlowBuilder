@@ -211,10 +211,15 @@
   opacity: 65%;
 }
 
-.supported-inputs> div {
+.supported-inputs> .actual-inputs {
   display: flex;
   align-items: center;
+  flex-direction: column;
   gap: 0.75rem;
+}
+
+.actual-inputs > div {
+  display: flex;
 }
 
 .landing-cards {
@@ -240,6 +245,80 @@
   flex-direction: row;
 }
 
+.example-section {
+  margin: 0 10.125rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  height: 100vh;
+}
+
+.example-card {
+  width: 22.72rem;
+  background-color: #000;
+  color: white;
+  border-radius: 25.6px;
+  height: 5.5rem;
+  padding: 24px;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  font-size: 24px !important;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
+}
+
+.example-card > h4 {
+  font-size: 24px !important;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
+}
+
+.example-cards {
+  display: flex;
+  justify-content: space-between;
+  width: 80%;
+}
+
+.example-video {
+  width: 80%;
+  aspect-ratio: 16/9;
+  height: auto;
+  background-color: black;
+}
+
+.landing-section-2 {
+  margin: 0 10.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.68rem;
+  min-height: 520px;
+  justify-content: center;
+  align-items: center;
+}
+
+.testimonial-section {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.testimonial {
+  padding: 1.75rem;
+  display: flex;
+  gap: 1.25rem;
+  flex-direction: column;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  border-radius: 25.6px;
+  flex: 1
+}
+
+.testimonial > h1 {
+  font-size: 1.5rem;
+}
+
 #try-now {
   background-color: black;
   border-radius: 2rem;
@@ -252,6 +331,27 @@
   letter-spacing: 0;
   font-family: "Inter", sans-serif;
 }
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 6.125rem;
+  padding-bottom: 2rem;
+}
+
+#contact {
+  color: rgba(0, 0, 0, 1);
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0;
+  opacity: 50%;
+  font-weight: 400;
+}
+
 
 #try-now:hover {
   scale: 1.05;
