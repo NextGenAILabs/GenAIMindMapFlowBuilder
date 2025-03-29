@@ -12,6 +12,7 @@ class UpdateFlow(BaseModel):
     flow_id: str
     flow_name: str
     flow_json: str
+    flow_type: str
     summary: str
 
 class PDFNodeQueryRequest(BaseModel):

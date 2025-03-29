@@ -1,4 +1,4 @@
-import PDFSvg from '../assets/pdf.svg';
+import PDFSvg from '../assets/docx.svg';
 import CROSSSvg from '../assets/cross.svg';
 import RIGHTArrow from '../assets/right.svg';
 import { useState } from 'react';
@@ -179,7 +179,7 @@ const DocxModal = () => {
                         src={PDFSvg}
                         alt="SQL SVG"
                     />
-                    <p>Load A Pdf</p>
+                    <p>Load A Docx</p>
                 </div>
                 <img
                     src={CROSSSvg}

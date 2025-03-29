@@ -1061,17 +1061,19 @@ def list_flows():
 @app.put("/flow-update/")
 def update_flow(update_data: UpdateFlow):
     try:
-
+        print(update_data)
         result = flow_collection.update_one(
             {"_id": ObjectId(update_data.flow_id)},
             {
                 "$set": {
                     "flow_name": update_data.flow_name,
                     "flow_json": update_data.flow_json,
+                    "flow_type": update_data.flow_type,
                     "summary": update_data.summary,
                 }
             },
         )
+        print(result)
 
         if result.matched_count == 0:
             raise HTTPException(
@@ -1270,7 +1272,7 @@ def openai_mindmap_generator(file: UploadFile, flow_id: str, flow_type: str):
         )
     else:
         raise ValueError("Unsupported file type")
-
+    print("======================================", file_extension)
     thread = openai.beta.threads.create(
         messages=[
             {
@@ -1311,12 +1313,12 @@ def openai_mindmap_generator(file: UploadFile, flow_id: str, flow_type: str):
                             "flow_id": "{flow_id}",
                             "file": "{file.filename}"  // Empty object or file metadata
                         }}
-
+                5. **RESPONSE NODE FORMAT**
                 - `response` Node:
                     - `data` contains nested properties:
                         {{
                             "id": "<unique identifier of 12 or 24 digit unique uuid or nanoid>",
-                            "type": "MDNode | WebNode | MultipleQA | other",
+                            "type": "response" !!DOESN'T CHANGE,
                             "data": {{
                                 "question": "<question text, if applicable>",
                                 "summ": "<summary or answer>",
@@ -1328,7 +1330,7 @@ def openai_mindmap_generator(file: UploadFile, flow_id: str, flow_type: str):
                             }}
                         }}
 
-                5. **Connections:**
+                6. **Connections:**
                 - Connections between nodes should be represented by edges, with the following format:
                     - `id` (unique identifier for the edge)
                     - `source` (ID of the source node)
@@ -1336,7 +1338,7 @@ def openai_mindmap_generator(file: UploadFile, flow_id: str, flow_type: str):
                     - `type` (optional, defaults to `default`)
                     - 'animated' !!WILL ALWAYS BE TRUE
 
-                6. **Viewport Configuration:**
+                7. **Viewport Configuration:**
                 - Include a `viewport` object that specifies:
                     - `x` (horizontal position of the viewport)
                     - `y` (vertical position of the viewport)
@@ -1401,8 +1403,10 @@ def openai_mindmap_generator(file: UploadFile, flow_id: str, flow_type: str):
     }
 
     component_id = component_collection.insert_one(component_metadata).inserted_id
-
+    flow = flow_collection.find_one({id: ObjectId(flow_id)})
     return {
+        "flow_id": ObjectId(flow_id),
+        "flow_name": flow["flow_name"],
         "component_id": str(component_id),
         "type": file_extension,
         "mindmap_json": response_json,
@@ -1621,7 +1625,7 @@ async def create_img_component(flow_id: str = Form(...), file: UploadFile = File
                         {{
                             "prompt": "<data source description>",
                             "name": "img", !!!DOESN"T CHANGES 
-                            "content": "<file name or content>",
+                            "content": "{file.filename}" !!!DOESN't CHANGES,
                             "flow_id": "{flow_id}",
                             "file": "{file.filename}"  // Empty object or file metadata
                         }}
@@ -1671,6 +1675,7 @@ async def create_img_component(flow_id: str = Form(...), file: UploadFile = File
 
         response_json = response.text
         response_json =  response_json.replace("```json", "").replace("```", "").replace("\n", "").strip()
+        response_json = json.loads(response_json)
         
         print(response_json)
         
@@ -1780,7 +1785,7 @@ async def create_audio_component(
                         {{
                             "prompt": "<data source description>",
                             "name": "audio", !!!DOESN"T CHANGES 
-                            "content": "<file name or content>",
+                            "content": "{file.filename}",
                             "flow_id": "{flow_id}",
                             "file": "{file.filename}"  // Empty object or file metadata
                         }}
@@ -1830,7 +1835,7 @@ async def create_audio_component(
 
         response_json = response.text
         response_json =  response_json.replace("```json", "").replace("```", "").replace("\n", "").strip()
-        
+        response_json = json.loads(response_json); 
         print(response_json)
         
         component_metadata = {
@@ -1913,7 +1918,7 @@ def create_youtube_component(
                         {{
                             "prompt": "<data source description>",
                             "name": "youtube", !!!DOESN"T CHANGES 
-                            "content": "<file name or content>",
+                            "content": "{youtube_url}", !!! DOESN'T CHANGEs
                             "flow_id": "{flow_id}",
                             "file": "{youtube_url}"  // Empty object or file metadata
                         }}
@@ -1965,6 +1970,7 @@ def create_youtube_component(
 
         response_json = response.text
         response_json =  response_json.replace("```json", "").replace("```", "").replace("\n", "").strip()
+        response_json = json.loads(response_json)
         
         print(response_json)
         

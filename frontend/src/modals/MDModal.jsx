@@ -180,7 +180,7 @@ const MDModal = () => {
                         src={MDSvg}
                         alt="SQL SVG"
                     />
-                    <p>Load A Pdf</p>
+                    <p>Load A Markdown</p>
                 </div>
                 <img
                     src={CROSSSvg}
@@ -199,7 +199,7 @@ const MDModal = () => {
                             alt="image will be here"
                         />
                         {/* <p>Upload a CSV</p> */}
-                        {file ? <p>{file.name}</p> : <p>Upload a Narkdown File</p>}
+                        {file ? <p>{file.name}</p> : <p>Upload a Markdown File</p>}
                     </div>
                     <img
                         src={RIGHTArrow}

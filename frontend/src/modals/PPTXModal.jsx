@@ -1,4 +1,4 @@
-import PDFSvg from '../assets/pdf.svg';
+import PDFSvg from '../assets/pptx.svg';
 import CROSSSvg from '../assets/cross.svg';
 import RIGHTArrow from '../assets/right.svg';
 import { useState } from 'react';
@@ -15,22 +15,38 @@ import DataSourceSet from '../nodes/DataSourceSet';
 import DataSourceSelect from '../global-components/DataSourceSelect';
 import ErrorModal from './ErrorModal';
 import errorStore from '../stores/errorStore';
+import DELETESvg from '../assets/delete.svg';
+import { useReactFlow } from '@xyflow/react';
 
 const PPTXModal = () => {
-    const selector = (state) => ({
-        trigger: state.trigger,
-        setTrigger: state.setTrigger,
-        nodes: state.nodes,
-        setNodes: state.setNodes
-    });
-    const flowId = flowStore((s) => s.flow_id);
-    const { trigger, setTrigger, nodes, setNodes } = useStore(
-        useShallow(selector)
-    );
+   const flowId = flowStore((s) => s.flow_id);
     const [file, setFile] = useState();
     const pushNode = modalStore((s) => s.pushNode);
     const popNode = modalStore((s) => s.popNode);
     // const csvAccept = ".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+    const setFlowId = flowStore((s) => s.setFlow);
+    const flow_id = flowStore((s) => s.flow_id);
+    const setFlowName = flowStore((s) => s.setFlowName);
+    const { fitView } = useReactFlow();
+    const selector = (state) => ({
+        trigger: state.trigger,
+        setTrigger: state.setTrigger,
+        nodes: state.nodes,
+        edges: state.edges,
+        setNodes: state.setNodes,
+        setEdges: state.setEdges,
+        setViewPort: state.setViewPort
+    });
+
+    const {
+        trigger,
+        setTrigger,
+        nodes,
+        edges,
+        setNodes,
+        setEdges,
+        setViewPort
+    } = useStore(useShallow(selector));
     const pptxAccept = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
 
 
@@ -46,9 +62,64 @@ const PPTXModal = () => {
                     'Content-Type': headerConfig
                 }
             })
-            .then((res) => manageNodes(res.data))
+            .then((res) => setupNodes(res.data))
             .catch((err) => manageErrors(err));
     };
+
+    const setupNodes = (data) => {
+        if (data.flow_type === 'automatic') {
+            manageAutomaticNode(data)
+        } else {
+            manageNodes(data)
+        }
+    }
+
+    const manageAutomaticNode = (data) => {
+        setupFlow(data)
+    }
+    const setupFlow = (data) => {
+        console.log("SETUUUUUUUUUUUUUUUUUUP new flow")
+        pushNode(LoadingModal);
+        setFlowId(data.flow_id);
+        console.log('DEDEDE', data);
+        setFlowName(data.flow_name);
+        const jsonString = JSON.stringify(data.mindmap_json)
+        console.log(jsonString, "JSON STRINGGGGGGGGGGGGGG")
+        if (jsonString.length > 0) {
+            const flow = JSON.parse(jsonString);
+            console.log('NODEEEEEEEEEE', flow.nodes);
+            if (flow.nodes.length === 0 && flow.edges.length === 0) {
+                console.log('not clled');
+                setTrigger(!trigger);
+                setViewPort(0, 0, 1);
+                popNode();
+            }
+            if (flow) {
+                const { x = 0, y = 0, zoom = 1.25 } = flow.viewport;
+                setNodes(flow.nodes || []);
+                setEdges(flow.edges || []);
+                setViewPort(x, y, zoom);
+                // fitView();
+                console.log(
+                    'FLow selecteed sadassssssssssssssssssssss',
+                    flow_id,
+                    data.flow_id,
+                    nodes
+                );
+            } else {
+                console.log('Flow error');
+            }
+        } else {
+            setNodes([]);
+            setEdges([]);
+            // setViewPort({});
+            fitView();
+            popNode();
+        }
+        // setTrigger(!trigger);
+    };
+
+
 
     const selector2 = (state) => ({
         status: state.status,
@@ -109,7 +180,7 @@ const PPTXModal = () => {
                         src={PDFSvg}
                         alt="SQL SVG"
                     />
-                    <p>Load A Pdf</p>
+                    <p>Load A PPT</p>
                 </div>
                 <img
                     src={CROSSSvg}
@@ -128,7 +199,7 @@ const PPTXModal = () => {
                             alt="image will be here"
                         />
                         {/* <p>Upload a CSV</p> */}
-                        {file ? <p>{file.name}</p> : <p>Upload a Audio</p>}
+                        {file ? <p>{file.name}</p> : <p>Upload a PPT</p>}
                     </div>
                     <img
                         src={RIGHTArrow}

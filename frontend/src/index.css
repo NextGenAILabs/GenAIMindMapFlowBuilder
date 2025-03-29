@@ -27,7 +27,7 @@
   --header-color: var(--white-color);
   --font-color: var(--black-color);
   --font-inverse: var(--black-color);
-  --border-color: var(--white-color);
+  --border-color: var(--black-color);
   --border-inverse: var(--black-color);
   --node-background: var(--white-color);
   --node-response-background: var(--node-background);
@@ -48,13 +48,14 @@
   --cancel-button-bg-color: rgba(17, 17, 17, 0.08);
   --contrast-font: var(--white-color);
   --input-color: #111;
+  --mode-border: #C7C6C6;
 }
 
 .dark {
   --main-color: #0A0A0A;
   --header-color: #141414;
   --font-color: var(--white-color);
-  --border-color: var(--black-color);
+  --border-color: var(--white-color);
   --border-inverse: var(--white-color);
   --font-inverse: var(--white-color);
   --node-background: #232323;
@@ -74,6 +75,18 @@
   --cancel-button-bg-color: rgba(255, 255, 255, 0.05);
   --contrast-font: var(--black-color);
   --input-color: #898989;
+  --mode-border: #4C4D4D;
+}
+
+#darkMode {
+  filter: invert(0)
+}
+
+#darkMode {
+  border: 1px solid var(--mode-border);
+  padding: 4px;
+  border-radius: 50%;
+  background-color: transparent;
 }
 
 .react-flow.dark {

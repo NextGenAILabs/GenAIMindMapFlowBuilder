@@ -1,4 +1,6 @@
 import DRAWERSvg from '../assets/drawer.svg';
+import LIGHT from '../assets/lightMode.svg';
+import DARK from '../assets/darkMode.svg';
 import LoadingModal from '../modals/LoadingModal';
 import flowStore from '../stores/flowStore';
 import modalStore from '../stores/modalStore';
@@ -27,6 +29,7 @@ const Header = ({
     const pushNode = modalStore((s) => s.pushNode);
     const popNode = modalStore((s) => s.popNode);
     const flow_id = flowStore((s) => s.flow_id);
+    const flow_type = flowStore((s) => s.flow_type);
     const rfInstance = flowStore((s) => s.rfInstance);
     const flow_name = flowStore((s) => s.flow_name);
     const setFlowName = flowStore((s) => s.setFlowName);
@@ -49,6 +52,7 @@ const Header = ({
             flow_id: flow_id,
             flow_name: flow_name,
             flow_json: flow_json,
+            flow_type: flow_type,
             summary: 'Please work'
         };
         console.log('JSON DATA', data);
@@ -170,13 +174,11 @@ const Header = ({
                 onChange={(e) => setupFlowName(e)}
             />
             <div className="button">
-                <button
-                    id="save-button"
+                <img
+                    src={lightMode ? LIGHT : DARK}
                     alt="Save button"
                     onClick={(e) => manageTheme(!lightMode)}
-                >
-                    Toggle Color
-                </button>
+                />
                 <img
                     src={DOWNLOADSvg}
                     alt="download_svg"

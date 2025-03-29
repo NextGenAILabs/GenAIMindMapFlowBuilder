@@ -109,7 +109,7 @@ const AudioModal = () => {
                         src={AudioSvg}
                         alt="SQL SVG"
                     />
-                    <p>Load A Pdf</p>
+                    <p>Load A Audio File</p>
                 </div>
                 <img
                     src={CROSSSvg}

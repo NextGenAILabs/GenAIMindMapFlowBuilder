@@ -86,6 +86,7 @@ const FlowModal = ({isDrawer, setIsDrawer, isViewModal, setIsViewFlowModal}) => 
 
 
     const setupNewFlow = (res) => {
+        console.log("SERVER RESPONSE", res.data)
         setFlow(res.data.flow_id);
         setFlowType(res.data.flow_type)
         setIsDrawer(!isDrawer);
@@ -120,11 +121,7 @@ const FlowModal = ({isDrawer, setIsDrawer, isViewModal, setIsViewFlowModal}) => 
             <div className="modal-container">
                 <div className="title">
                     <div>
-                        <img
-                            src={PDFSvg}
-                            alt="SQL SVG"
-                        />
-                        <p>Load A Pdf</p>
+                        <p>Select Flow Type</p>
                     </div>
                     <img
                         src={CROSSSvg}
