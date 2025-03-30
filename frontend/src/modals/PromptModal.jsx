@@ -13,26 +13,57 @@ const PromptModal = () => {
 	})
 	const { popNode, pushNode, setSourceId, sourceId } = modalStore(useShallow(selector));
 	console.log("impo +", sourceId)
-	const [activeAgent, setActiveAgent] = useState("Portfolio Manager")
+	const [activeAgent, setActiveAgent] = useState('Strategic Advisor');
 	return (
-		<div className="modal-container prompts-selection">
-			<div className="title">
-				<div>
-					<img src={PROMPTSvg} alt="Prompts Svg" />
-					<p>Choose Agent</p>
-				</div>
-				<img src={CROSSSvg} alt="Cross Svg" onClick={(e) => popNode()} />
-			</div>
-			<div className="prompts">
-				<Prompts agentName={"Portfolio Manager"} activeAgent={activeAgent} setActiveAgent={setActiveAgent} id={sourceId} />
-				<Prompts agentName={"Compliance Officer"} activeAgent={activeAgent} setActiveAgent={setActiveAgent} id={sourceId} />
-				<Prompts agentName={"Credit Manager"} activeAgent={activeAgent} setActiveAgent={setActiveAgent} id={sourceId} />
-				<Prompts agentName={"Project Manager"} activeAgent={activeAgent} setActiveAgent={setActiveAgent} id={sourceId} />
-				<Prompts agentName={"Custom Prompts"} activeAgent={activeAgent} setActiveAgent={setActiveAgent} id={sourceId} />
-			</div>
-
-		</div>
-	)
+        <div className="modal-container prompts-selection">
+            <div className="title">
+                <div>
+                    <img
+                        src={PROMPTSvg}
+                        alt="Prompts Svg"
+                    />
+                    <p>Choose Agent</p>
+                </div>
+                <img
+                    src={CROSSSvg}
+                    alt="Cross Svg"
+                    onClick={(e) => popNode()}
+                />
+            </div>
+            <div className="prompts">
+                <Prompts
+                    agentName={'Strategic Advisor'}
+                    activeAgent={activeAgent}
+                    setActiveAgent={setActiveAgent}
+                    id={sourceId}
+                />
+                <Prompts
+                    agentName={'Research Assistant'}
+                    activeAgent={activeAgent}
+                    setActiveAgent={setActiveAgent}
+                    id={sourceId}
+                />
+                <Prompts
+                    agentName={'Productivity Coach'}
+                    activeAgent={activeAgent}
+                    setActiveAgent={setActiveAgent}
+                    id={sourceId}
+                />
+                <Prompts
+                    agentName={'Data Interpreter'}
+                    activeAgent={activeAgent}
+                    setActiveAgent={setActiveAgent}
+                    id={sourceId}
+                />
+                <Prompts
+                    agentName={'Custom Prompts'}
+                    activeAgent={activeAgent}
+                    setActiveAgent={setActiveAgent}
+                    id={sourceId}
+                />
+            </div>
+        </div>
+    );
 }
 
 export default PromptModal

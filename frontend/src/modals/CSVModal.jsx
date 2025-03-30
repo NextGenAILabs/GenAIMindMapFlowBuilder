@@ -67,18 +67,18 @@ const CSVModal = () => {
 
 	const manageNodes = (data) => {
 		const node = {
-			id: data.component_id,
-			position: { x: 0, y: 0 },
-			type: "dataSource",
-			data: {
-				name: data.type,
-				content: file.name,
-				flow_id: flowId,
-				prompt: "Portfolio Manager",
-				file: file,
-				header_row: header_row
-			}
-		}
+            id: data.component_id,
+            position: { x: 0, y: 0 },
+            type: 'dataSource',
+            data: {
+                name: data.type,
+                content: file.name,
+                flow_id: flowId,
+                prompt: 'Research Assistant',
+                file: file,
+                header_row: header_row
+            }
+        };
 		if (nodes.length === 0) {
 			setNodes([node]);
 		} else {

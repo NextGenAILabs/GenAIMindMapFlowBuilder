@@ -152,8 +152,8 @@ const videoAccept = 'video/*';
                 name: data.type,
                 content: file.name,
                 flow_id: flowId,
-                prompt: 'Portfolio Manager',
-                file: file,
+                prompt: 'Research Assistant',
+                file: file
             }
         };
         if (nodes.length === 0) {

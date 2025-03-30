@@ -204,6 +204,7 @@ const QuestionNode = ({ id, position, data  }) => {
             {currNodeObj ? (
                 currNodeObj.data.question ? (
                     <textarea
+                        className=".question-textarea"
                         placeholder="Ask a Question"
                         disabled
                         onInput={handleInput}
@@ -215,6 +216,7 @@ const QuestionNode = ({ id, position, data  }) => {
                     />
                 ) : (
                     <textarea
+                        className=".question-textarea"
                         placeholder="Ask a Question"
                         onInput={handleInput}
                         defaultValue={currNodeObj.data.question}

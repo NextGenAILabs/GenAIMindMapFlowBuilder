@@ -75,7 +75,7 @@
   --cancel-button-bg-color: rgba(255, 255, 255, 0.05);
   --contrast-font: var(--black-color);
   --input-color: #898989;
-  --mode-border: #4C4D4D;
+  --mode-border: #a7b8b8;
 }
 
 #darkMode {
@@ -330,6 +330,7 @@
   line-height: 100%;
   letter-spacing: 0;
   font-family: "Inter", sans-serif;
+  color: white;
 }
 
 .footer {
@@ -717,6 +718,7 @@ input:focus {
   gap: 1rem;
   width: 25rem;
   align-items: flex-start;
+  color: var(--white-color);
 }
 
 .node-question>textarea {
@@ -730,6 +732,7 @@ input:focus {
   line-height: 36px;
   /* resize: none; */
   overflow-y: auto;
+  color: var(--white-color);
 }
 
 .node-question:hover {
@@ -898,12 +901,14 @@ code {
   border: 2px solid #eece47;
   border-radius: 5rem;
   background-color: #000;
+  color: var(--white-color);
 }
 
 .multiple-class>div {
   display: flex;
   align-items: center;
   gap: 1rem;
+  color: var(--white-color);
 }
 
 .multiple-class>div>input {
@@ -912,6 +917,7 @@ code {
   font-size: 1.5rem;
   font-weight: 600;
   background-color: #000;
+  color: var(--white-color);
 }
 
 .animate {

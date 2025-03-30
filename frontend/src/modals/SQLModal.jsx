@@ -75,7 +75,7 @@ const SQLModal = () => {
                 name: data.type,
                 content: tableName,
                 flow_id: flowId,
-                prompt: 'Portfolio Manager'
+                prompt: 'Research Assistant'
             }
         };
         if (nodes.length === 0) {

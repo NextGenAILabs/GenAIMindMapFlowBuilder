@@ -136,16 +136,16 @@ const YTModal = () => {
 
 	const manageNodes = (data) => {
 		const node = {
-			id: data.component_id,
-			position: { x: 0, y: 0 },
-			type: "dataSource",
-			data: {
-				name: data.type,
-				content: url,
-				flow_id: flowId,
-				prompt: "Portfolio Manager"
-			},
-		}
+            id: data.component_id,
+            position: { x: 0, y: 0 },
+            type: 'dataSource',
+            data: {
+                name: data.type,
+                content: url,
+                flow_id: flowId,
+                prompt: 'Research Assistant'
+            }
+        };
 		if (nodes.length === 0) {
 			setNodes([node]);
 		} else {

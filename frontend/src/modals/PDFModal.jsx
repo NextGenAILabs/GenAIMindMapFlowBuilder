@@ -149,7 +149,7 @@ const PDFModal = () => {
                 name: data.type,
                 content: file.name,
                 flow_id: flowId,
-                prompt: 'Portfolio Manager',
+                prompt: 'Research Assistant',
                 file: file,
                 processing_type: processingType
             }

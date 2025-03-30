@@ -12,7 +12,7 @@ import setRequestData from '../config/setRequestData';
 import setFollowUp from '../config/setFollowUp';
 import { useNodeId } from '@xyflow/react';
 import flowStore from '../stores/flowStore';
-import getPrompts from '../prompts/portfolioManager';
+import getPrompts from '../prompts/promptsModel';
 import { useEffect, useState } from 'react';
 import ErrorModal from '../modals/ErrorModal';
 import errorStore from '../stores/errorStore';

@@ -190,6 +190,7 @@ const Header = ({
                 />
                 <button
                     id="save-button"
+                    style={flow_type === 'automatic' ?  { display: 'none' } : { display: 'flex' }}
                     onClick={(e) => flowSummary(e)}
                 >
                     <span>Summarize</span>

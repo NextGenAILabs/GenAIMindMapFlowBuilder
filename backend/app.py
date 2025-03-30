@@ -4,7 +4,6 @@ from bson import ObjectId
 import boto3
 from typing import List
 from Models.model import CSVNodeQueryRequest, CSVNodeQueryResponse, Flow
-from Models.model import UpdateFlow
 from Models.model import PDFNodeQueryRequest
 from Models.model import PDFNodeQueryResponse
 from Models.model import TXTNodeQueryRequest
@@ -112,11 +111,11 @@ vertexai.init(
     project=gcp_project_id_str, credentials=credentials, location="us-central1"
 )
 
-model_vertexai = GenerativeModel("gemini-1.5-flash-002")
+model_vertexai = GenerativeModel("gemini-2.0-flash")
 
 genai.configure(api_key=gemini_api_key_str)
 
-model = genai.GenerativeModel("gemini-2.0-flash-exp")
+model = genai.GenerativeModel("gemini-2.0-flash")
 
 connection = sqlite3.connect("sqlite_data.db")
 
@@ -1059,7 +1058,7 @@ def list_flows():
 
 
 @app.put("/flow-update/")
-def update_flow(update_data: UpdateFlow):
+def update_flow(update_data: Flow):
     try:
         print(update_data)
         result = flow_collection.update_one(
@@ -1103,7 +1102,7 @@ def get_summary_from_openai(file: UploadFile, flow_id: str, flow_type: str):
     assistant = openai.beta.assistants.create(
         name="Summarize agent",
         instructions="Your task is to only summarize the document",
-        model="gpt-4o-mini",
+        model="gpt-4o",
         tools=[{"type": "file_search"}],
     )
     vector_store = openai.beta.vector_stores.create(name=f"{file_extension}_{flow_id}")
@@ -1176,9 +1175,13 @@ def get_summary_from_openai(file: UploadFile, flow_id: str, flow_type: str):
         thread_id=thread.id, assistant_id=assistant.id
     )
 
+    print(thread)
+    print(run)
+    
     messages = list(
         openai.beta.threads.messages.list(thread_id=thread.id, run_id=run.id)
     )
+    print(messages)
     message_content = messages[0].content[0].text
     annotations = message_content.annotations
 
@@ -1278,15 +1281,18 @@ def openai_mindmap_generator(file: UploadFile, flow_id: str, flow_type: str):
             {
                 "role": "user",
                 "content" : f"""
-                You are tasked with generating a JSON mind map that is compatible with React Flow for rendering a flow diagram. The mind map should adhere to the following rules:
+                You are tasked with generating a JSON mind map that is compatible with React Flow for rendering a flow diagram which should cover all the details and important aspects of the component for which multiple nodes can be required. The mind map should adhere to the following rules:
 
                 1. **Node Types:**
                 - There will always be one `dataSource` node, which serves as the root of the flow.
-                - There will be a maximum of 5 `response` nodes.
-
+                - There will be `question` node which will be connected to the subsequent `response` node.
+                - The `question` node can be connected to data sources or other `response` nodes.
+                - There will be `response` for the above question
+                
                 2. **Node Relationships:**
-                - The `dataSource` node should be connected to all `response` nodes.
                 - `response` nodes may also connect to each other if it improves the logical flow or visualization.
+                - `question` node will always have a `response` node
+                - `dataSource` node will always be connected to a question node
 
                 3. **Node Properties:**
                 - Each node should have:
@@ -1313,7 +1319,15 @@ def openai_mindmap_generator(file: UploadFile, flow_id: str, flow_type: str):
                             "flow_id": "{flow_id}",
                             "file": "{file.filename}"  // Empty object or file metadata
                         }}
-                5. **RESPONSE NODE FORMAT**
+                5. **Question Data Format:**
+                - `question` Node:
+                    - `data` contains the following properties:
+                        {{
+                            "question": "<the question asked for the response>",
+                            "component_id": "<component reference ID - unique identifier of 12 or 24 digit unique uuid or nanoid>",
+                            "component_type" : "{file_extension}",
+                        }}
+                6. **RESPONSE NODE FORMAT**
                 - `response` Node:
                     - `data` contains nested properties:
                         {{
@@ -1321,7 +1335,7 @@ def openai_mindmap_generator(file: UploadFile, flow_id: str, flow_type: str):
                             "type": "response" !!DOESN'T CHANGE,
                             "data": {{
                                 "question": "<question text, if applicable>",
-                                "summ": "<summary or answer>",
+                                "summ": "<!!give me a detailed answer for the above question>",
                                 "df": [],
                                 "graph": "",
                                 "flow_id": "{flow_id}",
@@ -1330,7 +1344,7 @@ def openai_mindmap_generator(file: UploadFile, flow_id: str, flow_type: str):
                             }}
                         }}
 
-                6. **Connections:**
+                7. **Connections:**
                 - Connections between nodes should be represented by edges, with the following format:
                     - `id` (unique identifier for the edge)
                     - `source` (ID of the source node)
@@ -1338,7 +1352,7 @@ def openai_mindmap_generator(file: UploadFile, flow_id: str, flow_type: str):
                     - `type` (optional, defaults to `default`)
                     - 'animated' !!WILL ALWAYS BE TRUE
 
-                7. **Viewport Configuration:**
+                8. **Viewport Configuration:**
                 - Include a `viewport` object that specifies:
                     - `x` (horizontal position of the viewport)
                     - `y` (vertical position of the viewport)
@@ -1346,7 +1360,6 @@ def openai_mindmap_generator(file: UploadFile, flow_id: str, flow_type: str):
 
                 ### Additional Considerations:
                 - Ensure that the node positions are distributed properly to avoid overlap.
-                - If fewer than 5 `response` nodes are required, adjust accordingly.
                 - Prioritize connecting `response` nodes where it adds logical structure to the flow.
 
                 ### IMPORTANT:
@@ -1403,9 +1416,9 @@ def openai_mindmap_generator(file: UploadFile, flow_id: str, flow_type: str):
     }
 
     component_id = component_collection.insert_one(component_metadata).inserted_id
-    flow = flow_collection.find_one({id: ObjectId(flow_id)})
+    flow = flow_collection.find_one({"_id": ObjectId(flow_id)})
     return {
-        "flow_id": ObjectId(flow_id),
+        "flow_id": flow_id,
         "flow_name": flow["flow_name"],
         "component_id": str(component_id),
         "type": file_extension,
@@ -1491,13 +1504,8 @@ def one_shot_openai(query, vector_store_id, file_id, assistant_id):
             message_content.value = (
                 message_content.value.replace("```json", "").replace("```", "").strip()
             )
-            message_content.value = message_content.value.answer.replace("\n", "")
-        response = (
-            message_content.value.replace("```json", "")
-            .replace("```", "")
-            .strip()
-            .replace("\n", "")
-        )
+            message_content.value = message_content.value.replace("\n", "")
+        response = message_content.value.replace("```json", "").replace("```", "").strip().replace("\n", "") 
         print(response)
         return response
     except Exception as e:
@@ -1526,17 +1534,17 @@ def create_pdf_component(
         print(get_page_len(file))
         check_page_length = get_page_len(file)
         if processing_type == "gpt" and not check_page_length and flow["flow_type"] == 'manual':
-            return get_summary_from_openai(file, flow_id=flow_id)
+            return get_summary_from_openai(file, flow_id=flow_id, flow_type='manual')
         elif processing_type == "aws" and flow["flow_type"] == 'manual':
-            return use_aws_textract(file, flow_id=flow_id, flow_type="manual")
+            return use_aws_textract(file, flow_id=flow_id, flow_type='manual')
         elif processing_type == "custom" and flow["flow_type"] == 'manual':
-            return camelot_pdf_processing(flow_id, file, "manual")
+            return camelot_pdf_processing(flow_id, file, 'manual')
         elif processing_type == "gpt" and not check_page_length and flow["flow_type"] == 'automatic':
-            return openai_mindmap_generator(file, flow_id=flow_id, flow_type=flow["flow_type"])
+            return openai_mindmap_generator(file, flow_id=flow_id, flow_type='automatic')
         elif processing_type == "aws" and flow["flow_type"] == 'automatic':
-            return use_aws_textract(file, flow_id=flow_id, flow_type="automatic")
+            return use_aws_textract(file, flow_id=flow_id, flow_type='automatic')
         elif processing_type == "custom" and flow["flow_type"] == 'automatic':
-            return camelot_pdf_processing(flow_id, file, "automatic")
+            return camelot_pdf_processing(flow_id, file, 'automatic')
         else:
             traceback.print_exc()
             return HTTPException(status_code=404, detail="Exceeded Page limit for GPT.")
@@ -1690,6 +1698,8 @@ async def create_img_component(flow_id: str = Form(...), file: UploadFile = File
         component_id = component_collection.insert_one(component_metadata).inserted_id
 
         return {
+            "flow_id" : ObjectId(flow_id),
+            "flow_name": flow["flow_name"],
             "component_id": str(component_id),
             "type": "image",
             "mindmap_json": response_json,
@@ -1754,15 +1764,18 @@ async def create_audio_component(
         else:
             audio_part = {"mime_type": file.content_type, "data": contents}
             
-            template = f"""You are tasked with generating a JSON mind map for given audio file and make sure that is compatible with React Flow for rendering a flow diagram. The mind map should adhere to the following rules:
+            template = f"""You are tasked with generating a JSON mind map for given audio file and that should be compatible with React Flow for rendering a flow diagram which should cover all the details and important aspects of the component for which multiple nodes can be required. The mind map should adhere to the following rules:
 
                 1. **Node Types:**
                 - There will always be one `dataSource` node, which serves as the root of the flow.
-                - There will be a maximum of 5 `response` nodes.
-
+                - There will be `question` node which will be connected to the subsequent `response` node.
+                - The `question` node can be connected to data sources or other `response` nodes.
+                - There will be `response` for the above question
+                
                 2. **Node Relationships:**
-                - The `dataSource` node should be connected to all `response` nodes.
                 - `response` nodes may also connect to each other if it improves the logical flow or visualization.
+                - `question` node will always have a `response` node
+                - `dataSource` node will always be connected to a question node
 
                 3. **Node Properties:**
                 - Each node should have:
@@ -1785,19 +1798,27 @@ async def create_audio_component(
                         {{
                             "prompt": "<data source description>",
                             "name": "audio", !!!DOESN"T CHANGES 
-                            "content": "{file.filename}",
+                            "content": "<file name or content>",
                             "flow_id": "{flow_id}",
                             "file": "{file.filename}"  // Empty object or file metadata
                         }}
-
+                5. **Question Data Format:**
+                - `question` Node:
+                    - `data` contains the following properties:
+                        {{
+                            "question": "<the question asked for the response>",
+                            "component_id": "<component reference ID - unique identifier of 12 or 24 digit unique uuid or nanoid>",
+                            "component_type" : "audio",
+                        }}
+                6. **RESPONSE NODE FORMAT**
                 - `response` Node:
                     - `data` contains nested properties:
                         {{
                             "id": "<unique identifier of 12 or 24 digit unique uuid or nanoid>",
-                            "type": "MDNode | WebNode | MultipleQA | other",
+                            "type": "response" !!DOESN'T CHANGE,
                             "data": {{
                                 "question": "<question text, if applicable>",
-                                "summ": "<summary or answer>",
+                                "summ": "<!!give me a detailed answer for the above question>",
                                 "df": [],
                                 "graph": "",
                                 "flow_id": "{flow_id}",
@@ -1806,7 +1827,7 @@ async def create_audio_component(
                             }}
                         }}
 
-                5. **Connections:**
+                7. **Connections:**
                 - Connections between nodes should be represented by edges, with the following format:
                     - `id` (unique identifier for the edge)
                     - `source` (ID of the source node)
@@ -1814,7 +1835,7 @@ async def create_audio_component(
                     - `type` (optional, defaults to `default`)
                     - 'animated' !!WILL ALWAYS BE TRUE
 
-                6. **Viewport Configuration:**
+                8. **Viewport Configuration:**
                 - Include a `viewport` object that specifies:
                     - `x` (horizontal position of the viewport)
                     - `y` (vertical position of the viewport)
@@ -1822,14 +1843,13 @@ async def create_audio_component(
 
                 ### Additional Considerations:
                 - Ensure that the node positions are distributed properly to avoid overlap.
-                - If fewer than 5 `response` nodes are required, adjust accordingly.
                 - Prioritize connecting `response` nodes where it adds logical structure to the flow.
 
                 ### IMPORTANT:
                 - **RETURN ONLY THE VALID JSON OBJECT AND NO ADDITIONAL COMMENTS**.
                 - Do **not** include any explanations, text, or additional information.
                 - Maintain the format with double curly braces `{{` and `}}` as shown in the format.
-                """
+                """,   
 
         response = model.generate_content(contents=[template, audio_part])
 
@@ -1849,6 +1869,8 @@ async def create_audio_component(
         component_id = component_collection.insert_one(component_metadata).inserted_id
 
         return {
+            "flow_id" : ObjectId(flow_id),
+            "flow_name": flow["flow_name"],
             "component_id": str(component_id),
             "type": "audio",
             "mindmap_json": response_json,
@@ -1887,15 +1909,18 @@ def create_youtube_component(
             mime_type = "video/*"
             
             template = f"""
-                You are tasked with generating a JSON mind map of given youtube url and make sure that is compatible with React Flow for rendering a flow diagram. The mind map should adhere to the following rules:
+                You are tasked with generating a JSON mind map for give youtube URL and should be compatible with React Flow for rendering a flow diagram which should cover all the details and important aspects of the component for which multiple nodes can be required. The mind map should adhere to the following rules:
 
                 1. **Node Types:**
                 - There will always be one `dataSource` node, which serves as the root of the flow.
-                - There will be a maximum of 5 `response` nodes.
-
+                - There will be `question` node which will be connected to the subsequent `response` node.
+                - The `question` node can be connected to data sources or other `response` nodes.
+                - There will be `response` for the above question
+                
                 2. **Node Relationships:**
-                - The `dataSource` node should be connected to all `response` nodes.
                 - `response` nodes may also connect to each other if it improves the logical flow or visualization.
+                - `question` node will always have a `response` node
+                - `dataSource` node will always be connected to a question node
 
                 3. **Node Properties:**
                 - Each node should have:
@@ -1917,20 +1942,28 @@ def create_youtube_component(
                     - `data` contains the following properties:
                         {{
                             "prompt": "<data source description>",
-                            "name": "youtube", !!!DOESN"T CHANGES 
-                            "content": "{youtube_url}", !!! DOESN'T CHANGEs
+                            "name": "{youtube_url}", !!!DOESN"T CHANGES 
+                            "content": "<file name or content>",
                             "flow_id": "{flow_id}",
                             "file": "{youtube_url}"  // Empty object or file metadata
                         }}
-
+                5. **Question Data Format:**
+                - `question` Node:
+                    - `data` contains the following properties:
+                        {{
+                            "question": "<the question asked for the response>",
+                            "component_id": "<component reference ID - unique identifier of 12 or 24 digit unique uuid or nanoid>",
+                            "component_type" : "youtube",
+                        }}
+                6. **RESPONSE NODE FORMAT**
                 - `response` Node:
                     - `data` contains nested properties:
                         {{
                             "id": "<unique identifier of 12 or 24 digit unique uuid or nanoid>",
-                            "type": "MDNode | WebNode | MultipleQA | other",
+                            "type": "response" !!DOESN'T CHANGE,
                             "data": {{
                                 "question": "<question text, if applicable>",
-                                "summ": "<summary or answer>",
+                                "summ": "<!!give me a detailed answer for the above question>",
                                 "df": [],
                                 "graph": "",
                                 "flow_id": "{flow_id}",
@@ -1939,7 +1972,7 @@ def create_youtube_component(
                             }}
                         }}
 
-                5. **Connections:**
+                7. **Connections:**
                 - Connections between nodes should be represented by edges, with the following format:
                     - `id` (unique identifier for the edge)
                     - `source` (ID of the source node)
@@ -1947,7 +1980,7 @@ def create_youtube_component(
                     - `type` (optional, defaults to `default`)
                     - 'animated' !!WILL ALWAYS BE TRUE
 
-                6. **Viewport Configuration:**
+                8. **Viewport Configuration:**
                 - Include a `viewport` object that specifies:
                     - `x` (horizontal position of the viewport)
                     - `y` (vertical position of the viewport)
@@ -1955,14 +1988,13 @@ def create_youtube_component(
 
                 ### Additional Considerations:
                 - Ensure that the node positions are distributed properly to avoid overlap.
-                - If fewer than 5 `response` nodes are required, adjust accordingly.
                 - Prioritize connecting `response` nodes where it adds logical structure to the flow.
 
                 ### IMPORTANT:
                 - **RETURN ONLY THE VALID JSON OBJECT AND NO ADDITIONAL COMMENTS**.
                 - Do **not** include any explanations, text, or additional information.
                 - Maintain the format with double curly braces `{{` and `}}` as shown in the format.
-                """
+                """,   
 
         response = model_vertexai.generate_content(
             contents=[template, Part.from_uri(youtube_url, mime_type)]
@@ -1985,6 +2017,8 @@ def create_youtube_component(
         component_id = component_collection.insert_one(component_metadata).inserted_id
 
         return {
+            "flow_id" : ObjectId(flow_id),
+            "flow_name": flow["flow_name"],
             "component_id": str(component_id),
             "type": "youtube",
             "mindmap_json": response_json,
@@ -2059,15 +2093,19 @@ async def create_video_component(
             
             mime_type = "video/*"
             
-            template = f"""You are tasked with generating a JSON mind map for given video and make sure that is compatible with React Flow for rendering a flow diagram. The mind map should adhere to the following rules:
+            template = f"""
+                You are tasked with generating a JSON mind map for give video and should be compatible with React Flow for rendering a flow diagram which should cover all the details and important aspects of the component for which multiple nodes can be required. The mind map should adhere to the following rules:
 
                 1. **Node Types:**
                 - There will always be one `dataSource` node, which serves as the root of the flow.
-                - There will be a maximum of 5 `response` nodes.
-
+                - There will be `question` node which will be connected to the subsequent `response` node.
+                - The `question` node can be connected to data sources or other `response` nodes.
+                - There will be `response` for the above question
+                
                 2. **Node Relationships:**
-                - The `dataSource` node should be connected to all `response` nodes.
                 - `response` nodes may also connect to each other if it improves the logical flow or visualization.
+                - `question` node will always have a `response` node
+                - `dataSource` node will always be connected to a question node
 
                 3. **Node Properties:**
                 - Each node should have:
@@ -2089,20 +2127,28 @@ async def create_video_component(
                     - `data` contains the following properties:
                         {{
                             "prompt": "<data source description>",
-                            "name": "video", !!!DOESN"T CHANGES 
+                            "name": "{file.file_name}", !!!DOESN"T CHANGES 
                             "content": "<file name or content>",
                             "flow_id": "{flow_id}",
-                            "file": "{file.filename}"  // Empty object or file metadata
+                            "file": "{file.file_name}"  // Empty object or file metadata
                         }}
-
+                5. **Question Data Format:**
+                - `question` Node:
+                    - `data` contains the following properties:
+                        {{
+                            "question": "<the question asked for the response>",
+                            "component_id": "<component reference ID - unique identifier of 12 or 24 digit unique uuid or nanoid>",
+                            "component_type" : "video",
+                        }}
+                6. **RESPONSE NODE FORMAT**
                 - `response` Node:
                     - `data` contains nested properties:
                         {{
                             "id": "<unique identifier of 12 or 24 digit unique uuid or nanoid>",
-                            "type": "MDNode | WebNode | MultipleQA | other",
+                            "type": "response" !!DOESN'T CHANGE,
                             "data": {{
                                 "question": "<question text, if applicable>",
-                                "summ": "<summary or answer>",
+                                "summ": "<!!give me a detailed answer for the above question>",
                                 "df": [],
                                 "graph": "",
                                 "flow_id": "{flow_id}",
@@ -2111,7 +2157,7 @@ async def create_video_component(
                             }}
                         }}
 
-                5. **Connections:**
+                7. **Connections:**
                 - Connections between nodes should be represented by edges, with the following format:
                     - `id` (unique identifier for the edge)
                     - `source` (ID of the source node)
@@ -2119,7 +2165,7 @@ async def create_video_component(
                     - `type` (optional, defaults to `default`)
                     - 'animated' !!WILL ALWAYS BE TRUE
 
-                6. **Viewport Configuration:**
+                8. **Viewport Configuration:**
                 - Include a `viewport` object that specifies:
                     - `x` (horizontal position of the viewport)
                     - `y` (vertical position of the viewport)
@@ -2127,14 +2173,13 @@ async def create_video_component(
 
                 ### Additional Considerations:
                 - Ensure that the node positions are distributed properly to avoid overlap.
-                - If fewer than 5 `response` nodes are required, adjust accordingly.
                 - Prioritize connecting `response` nodes where it adds logical structure to the flow.
 
                 ### IMPORTANT:
                 - **RETURN ONLY THE VALID JSON OBJECT AND NO ADDITIONAL COMMENTS**.
                 - Do **not** include any explanations, text, or additional information.
                 - Maintain the format with double curly braces `{{` and `}}` as shown in the format.
-                """
+                """,   
 
         response = model_vertexai.generate_content(
             contents=[template, Part.from_uri(video_url, mime_type)]
@@ -2143,8 +2188,10 @@ async def create_video_component(
         response_json = response.text
         response_json =  response_json.replace("```json", "").replace("```", "").replace("\n", "").strip()
         
-        print(response_json)
+        response_json = json.loads(response_json)
         
+        print(response_json)
+                
         component_metadata = {
             "flow_id": ObjectId(flow_id),
             "video_url": video_url,
@@ -2156,6 +2203,8 @@ async def create_video_component(
         component_id = component_collection.insert_one(component_metadata).inserted_id
 
         return {
+            "flow_id" : ObjectId(flow_id),
+            "flow_name": flow["flow_name"],
             "component_id": str(component_id),
             "type": "video",
             "mindmap_json": response_json,
@@ -2350,8 +2399,8 @@ async def create_web_crawler(
         if flow_type == "manual":
             assistant = openai.beta.assistants.create(
                 name="Summarize agent",
-                instructions="Your task is to only sumamrize the document",
-                model="gpt-4o-mini",
+                instructions="Your task is to only summarize the document",
+                model="gpt-4o",
                 tools=[{"type": "file_search"}],
             )
             vector_store = openai.beta.vector_stores.create(name=f"web_{flow_id}")
@@ -2440,15 +2489,19 @@ async def create_web_crawler(
             messages=[
             {
                 "role": "user",
-                "content" : f"""You are tasked with generating a JSON mind map that is compatible with React Flow for rendering a flow diagram. The mind map should adhere to the following rules:
+                "content" : f"""
+                You are tasked with generating a JSON mind map that is compatible with React Flow for rendering a flow diagram which should cover all the details and important aspects of the component for which multiple nodes can be required. The mind map should adhere to the following rules:
 
                 1. **Node Types:**
                 - There will always be one `dataSource` node, which serves as the root of the flow.
-                - There will be a maximum of 5 `response` nodes.
-
+                - There will be `question` node which will be connected to the subsequent `response` node.
+                - The `question` node can be connected to data sources or other `response` nodes.
+                - There will be `response` for the above question
+                
                 2. **Node Relationships:**
-                - The `dataSource` node should be connected to all `response` nodes.
                 - `response` nodes may also connect to each other if it improves the logical flow or visualization.
+                - `question` node will always have a `response` node
+                - `dataSource` node will always be connected to a question node
 
                 3. **Node Properties:**
                 - Each node should have:
@@ -2470,20 +2523,28 @@ async def create_web_crawler(
                     - `data` contains the following properties:
                         {{
                             "prompt": "<data source description>",
-                            "name": "web", !!!DOESN"T CHANGES 
+                            "name": "{web_url}", !!!DOESN"T CHANGES 
                             "content": "<file name or content>",
                             "flow_id": "{flow_id}",
-                            "file": "web_url"  // Empty object or file metadata
+                            "file": "{web_url}"  // Empty object or file metadata
                         }}
-
+                5. **Question Data Format:**
+                - `question` Node:
+                    - `data` contains the following properties:
+                        {{
+                            "question": "<the question asked for the response>",
+                            "component_id": "<component reference ID - unique identifier of 12 or 24 digit unique uuid or nanoid>",
+                            "component_type" : "web",
+                        }}
+                6. **RESPONSE NODE FORMAT**
                 - `response` Node:
                     - `data` contains nested properties:
                         {{
                             "id": "<unique identifier of 12 or 24 digit unique uuid or nanoid>",
-                            "type": "MDNode | WebNode | MultipleQA | other",
+                            "type": "response" !!DOESN'T CHANGE,
                             "data": {{
                                 "question": "<question text, if applicable>",
-                                "summ": "<summary or answer>",
+                                "summ": "<!!give me a detailed answer for the above question>",
                                 "df": [],
                                 "graph": "",
                                 "flow_id": "{flow_id}",
@@ -2492,7 +2553,7 @@ async def create_web_crawler(
                             }}
                         }}
 
-                5. **Connections:**
+                7. **Connections:**
                 - Connections between nodes should be represented by edges, with the following format:
                     - `id` (unique identifier for the edge)
                     - `source` (ID of the source node)
@@ -2500,7 +2561,7 @@ async def create_web_crawler(
                     - `type` (optional, defaults to `default`)
                     - 'animated' !!WILL ALWAYS BE TRUE
 
-                6. **Viewport Configuration:**
+                8. **Viewport Configuration:**
                 - Include a `viewport` object that specifies:
                     - `x` (horizontal position of the viewport)
                     - `y` (vertical position of the viewport)
@@ -2508,14 +2569,13 @@ async def create_web_crawler(
 
                 ### Additional Considerations:
                 - Ensure that the node positions are distributed properly to avoid overlap.
-                - If fewer than 5 `response` nodes are required, adjust accordingly.
                 - Prioritize connecting `response` nodes where it adds logical structure to the flow.
 
                 ### IMPORTANT:
                 - **RETURN ONLY THE VALID JSON OBJECT AND NO ADDITIONAL COMMENTS**.
                 - Do **not** include any explanations, text, or additional information.
                 - Maintain the format with double curly braces `{{` and `}}` as shown in the format.
-                """,
+                """,   
 
                 "attachments": [
                     {"file_id": messages_file.id, "tools": [{"type": "file_search"}]}
@@ -2609,7 +2669,9 @@ def PDF_QA(request: PDFNodeQueryRequest):
             }
 
             node_id_response = node_collection.insert_one(node_data)
-
+            
+            print(node_id_response)
+            
             question_entries = []
 
             question_entries.append(
@@ -2641,6 +2703,7 @@ def PDF_QA(request: PDFNodeQueryRequest):
                 )
 
                 question_entries.append(empty_question_entry)
+                print(question_entries)
             return question_entries
 
         else:
@@ -2770,6 +2833,7 @@ def PDF_QA(request: PDFNodeQueryRequest):
             return question_entries
 
     except Exception as e:
+        print(traceback.print_exc())
         print(f"Error in /pdf-component-qa endpoint: {e.__traceback__}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
