@@ -1,11 +1,12 @@
 import SqlSvg from "../assets/sql.svg"
 import setDataSource from "../config/setDataSource";
 const DataSource = ({ id, data }) => {
-    const { img, title, content } = setDataSource(data)
+    const { img, title, content } = setDataSource(data) || {};
     // const img = SqlSvg
     // const title = "Temp"
     // const content = "content"
     return (
+        
         <div className="node-data-source">
             {/* <div>
                     <p className="node-description">Database Name</p>

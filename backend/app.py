@@ -1601,16 +1601,18 @@ async def create_img_component(flow_id: str = Form(...), file: UploadFile = File
 
             image_part = {"mime_type": file.content_type, "data": contents}
             
-            template = f"""
-                You are tasked with generating a JSON mind map for given image file and make sure that is compatible with React Flow for rendering a flow diagram. The mind map should adhere to the following rules:
+            template = f"""You are tasked with generating a JSON mind map for given image file and that should be compatible with React Flow for rendering a flow diagram which should cover all the details and important aspects of the component for which multiple nodes can be required. The mind map should adhere to the following rules:
 
                 1. **Node Types:**
                 - There will always be one `dataSource` node, which serves as the root of the flow.
-                - There will be a maximum of 5 `response` nodes.
-
+                - There will be `question` node which will be connected to the subsequent `response` node.
+                - The `question` node can be connected to data sources or other `response` nodes.
+                - There will be `response` for the above question
+                
                 2. **Node Relationships:**
-                - The `dataSource` node should be connected to all `response` nodes.
                 - `response` nodes may also connect to each other if it improves the logical flow or visualization.
+                - `question` node will always have a `response` node
+                - `dataSource` node will always be connected to a question node
 
                 3. **Node Properties:**
                 - Each node should have:
@@ -1632,29 +1634,37 @@ async def create_img_component(flow_id: str = Form(...), file: UploadFile = File
                     - `data` contains the following properties:
                         {{
                             "prompt": "<data source description>",
-                            "name": "img", !!!DOESN"T CHANGES 
-                            "content": "{file.filename}" !!!DOESN't CHANGES,
+                            "name": "image", !!!DOESN"T CHANGES 
+                            "content": "<file name or content>",
                             "flow_id": "{flow_id}",
                             "file": "{file.filename}"  // Empty object or file metadata
                         }}
-
+                5. **Question Data Format:**
+                - `question` Node:
+                    - `data` contains the following properties:
+                        {{
+                            "question": "<the question asked for the response>",
+                            "component_id": "<component reference ID - unique identifier of 12 or 24 digit unique uuid or nanoid>",
+                            "component_type" : "image",
+                        }}
+                6. **RESPONSE NODE FORMAT**
                 - `response` Node:
                     - `data` contains nested properties:
                         {{
                             "id": "<unique identifier of 12 or 24 digit unique uuid or nanoid>",
-                            "type": "MDNode | WebNode | MultipleQA | other",
+                            "type": "response" !!DOESN'T CHANGE,
                             "data": {{
                                 "question": "<question text, if applicable>",
-                                "summ": "<summary or answer>",
+                                "summ": "<!!give me a detailed answer for the above question>",
                                 "df": [],
                                 "graph": "",
                                 "flow_id": "{flow_id}",
                                 "component_id": "<component reference ID - unique identifier of 12 or 24 digit unique uuid or nanoid>",
-                                "component_type": "img"
+                                "component_type": "image"
                             }}
                         }}
 
-                5. **Connections:**
+                7. **Connections:**
                 - Connections between nodes should be represented by edges, with the following format:
                     - `id` (unique identifier for the edge)
                     - `source` (ID of the source node)
@@ -1662,7 +1672,7 @@ async def create_img_component(flow_id: str = Form(...), file: UploadFile = File
                     - `type` (optional, defaults to `default`)
                     - 'animated' !!WILL ALWAYS BE TRUE
 
-                6. **Viewport Configuration:**
+                8. **Viewport Configuration:**
                 - Include a `viewport` object that specifies:
                     - `x` (horizontal position of the viewport)
                     - `y` (vertical position of the viewport)
@@ -1670,7 +1680,6 @@ async def create_img_component(flow_id: str = Form(...), file: UploadFile = File
 
                 ### Additional Considerations:
                 - Ensure that the node positions are distributed properly to avoid overlap.
-                - If fewer than 5 `response` nodes are required, adjust accordingly.
                 - Prioritize connecting `response` nodes where it adds logical structure to the flow.
 
                 ### IMPORTANT:
@@ -1678,7 +1687,7 @@ async def create_img_component(flow_id: str = Form(...), file: UploadFile = File
                 - Do **not** include any explanations, text, or additional information.
                 - Maintain the format with double curly braces `{{` and `}}` as shown in the format.
                 """
-
+                
         response = model.generate_content(contents=[template, image_part])
 
         response_json = response.text
@@ -1688,7 +1697,7 @@ async def create_img_component(flow_id: str = Form(...), file: UploadFile = File
         print(response_json)
         
         component_metadata = {
-            "flow_id": ObjectId(flow_id),
+            "flow_id": flow_id,
             "name": file.filename,
             "type": "image",
             "processing_type": "gemini",
@@ -1849,7 +1858,7 @@ async def create_audio_component(
                 - **RETURN ONLY THE VALID JSON OBJECT AND NO ADDITIONAL COMMENTS**.
                 - Do **not** include any explanations, text, or additional information.
                 - Maintain the format with double curly braces `{{` and `}}` as shown in the format.
-                """,   
+                """
 
         response = model.generate_content(contents=[template, audio_part])
 
@@ -1869,7 +1878,7 @@ async def create_audio_component(
         component_id = component_collection.insert_one(component_metadata).inserted_id
 
         return {
-            "flow_id" : ObjectId(flow_id),
+            "flow_id" : flow_id,
             "flow_name": flow["flow_name"],
             "component_id": str(component_id),
             "type": "audio",
@@ -1888,6 +1897,8 @@ def create_youtube_component(
 ):
     try:
         flow = flow_collection.find_one({"_id": ObjectId(flow_id)})
+        
+        print(youtube_url)
         
         if flow["flow_type"] == 'manual':
             component_metadata = {
@@ -1942,7 +1953,7 @@ def create_youtube_component(
                     - `data` contains the following properties:
                         {{
                             "prompt": "<data source description>",
-                            "name": "{youtube_url}", !!!DOESN"T CHANGES 
+                            "name": "youtube", !!!DOESN"T CHANGES 
                             "content": "<file name or content>",
                             "flow_id": "{flow_id}",
                             "file": "{youtube_url}"  // Empty object or file metadata
@@ -1994,7 +2005,7 @@ def create_youtube_component(
                 - **RETURN ONLY THE VALID JSON OBJECT AND NO ADDITIONAL COMMENTS**.
                 - Do **not** include any explanations, text, or additional information.
                 - Maintain the format with double curly braces `{{` and `}}` as shown in the format.
-                """,   
+                """
 
         response = model_vertexai.generate_content(
             contents=[template, Part.from_uri(youtube_url, mime_type)]
@@ -2017,7 +2028,7 @@ def create_youtube_component(
         component_id = component_collection.insert_one(component_metadata).inserted_id
 
         return {
-            "flow_id" : ObjectId(flow_id),
+            "flow_id" : flow_id,
             "flow_name": flow["flow_name"],
             "component_id": str(component_id),
             "type": "youtube",
@@ -2027,6 +2038,7 @@ def create_youtube_component(
             
 
     except Exception as e:
+        traceback.print_exc()
         print(f"Error in /component-create-youtube endpoint: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
@@ -2127,10 +2139,10 @@ async def create_video_component(
                     - `data` contains the following properties:
                         {{
                             "prompt": "<data source description>",
-                            "name": "{file.file_name}", !!!DOESN"T CHANGES 
+                            "name": "{file.filename}", !!!DOESN"T CHANGES 
                             "content": "<file name or content>",
                             "flow_id": "{flow_id}",
-                            "file": "{file.file_name}"  // Empty object or file metadata
+                            "file": "{file.filename}"  // Empty object or file metadata
                         }}
                 5. **Question Data Format:**
                 - `question` Node:
@@ -2179,7 +2191,7 @@ async def create_video_component(
                 - **RETURN ONLY THE VALID JSON OBJECT AND NO ADDITIONAL COMMENTS**.
                 - Do **not** include any explanations, text, or additional information.
                 - Maintain the format with double curly braces `{{` and `}}` as shown in the format.
-                """,   
+                """
 
         response = model_vertexai.generate_content(
             contents=[template, Part.from_uri(video_url, mime_type)]
@@ -2203,7 +2215,7 @@ async def create_video_component(
         component_id = component_collection.insert_one(component_metadata).inserted_id
 
         return {
-            "flow_id" : ObjectId(flow_id),
+            "flow_id" : flow_id,
             "flow_name": flow["flow_name"],
             "component_id": str(component_id),
             "type": "video",

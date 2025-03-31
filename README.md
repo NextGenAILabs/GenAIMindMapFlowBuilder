@@ -1,117 +1,202 @@
-# 🧠 GenAI Mind Map Flow Builder
+# 🧠 GenAI Mind Map Flow Builder (Gnosis)
 
-**GenAI Mind Map Flow Builder** is a Generative AI-powered application that creates intelligent and dynamic mind maps from various data sources. It helps visualize the core ideas and relationships from documents, databases, media, and websites using modern LLMs.
+**GenAI Mind Map Flow Builder** is a cutting-edge, AI-powered tool designed to convert complex, multi-format data into structured, interactive mind maps. Powered by LLMs like OpenAI GPT-4o and Google Gemini, it allows users to process, query, visualize, and summarize knowledge extracted from diverse sources.
+
+📺 [Watch Demo on YouTube](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
 
 ---
 
-## 🚀 Features
+## 🚀 Key Features
 
-- 🔗 Connect and process data from:
-  - PDF, DOCX, TXT, CSV, PPTX, MD files
-  - SQL databases
-  - Images, videos, audios
-  - Web URLs
-- 🧠 Generate structured mind maps using:
-  - **OpenAI**
-  - **Google Gemini**
-- ⚡ Built with:
-  - **FastAPI** for the backend
-  - **ReactJS** for the frontend
+### 🔗 **Multi-Source Data Integration**
+- Upload or connect multiple data sources including:
+  - Documents, spreadsheets, web pages, databases, images, audio, and video
+- Add unlimited data sources in one flow
+- Reuse and interlink previous answers
+
+### 🧠 **AI-Powered Mind Map Generation**
+- Uses OpenAI GPT-4o and Google Gemini to:
+  - Summarize uploaded/connected content
+  - Extract relationships and concepts
+  - Generate mind maps automatically
+
+### 🧭 **Two Mind Map Modes**
+- **Automatic Mode**:
+  - Upload one source
+  - Mind map and summaries are auto-generated
+- **Manual Mode**:
+  - Upload/connect multiple sources
+  - AI asks follow-up questions based on context
+  - You can:
+    - Answer follow-ups
+    - Skip them
+    - Ask your own questions
+  - AI replies in a 3-part format:
+    1. 🧾 **Answer**
+    2. 📊 **Data Table (DataFrame)**
+    3. 🌐 **Graph (if applicable)**
+
+### 🔁 **Cross-Source Questioning**
+- Ask questions across:
+  - Multiple sources
+  - Previous AI responses
+- Link insights between different data nodes
+
+### 📚 **Mind Map to Report**
+- Export entire flow as an AI-generated structured PDF report
+- Auto-capture questions, answers, tables, graphs, and source traceability
+
+### 📤 **Export Options**
+- Download/share mind maps as images or JSON
+- Export complete flow as a detailed report (PDF)
+- Print-friendly visualization
 
 ---
 
 ## 📁 Supported Data Sources
 
-| Type         | Formats                                |
-|--------------|-----------------------------------------|
-| Documents    | `.pdf`, `.docx`, `.txt`, `.md`          |
-| Spreadsheets | `.csv`                                  |
-| Presentations| `.pptx`                                 |
-| Media        | `.mp4`, `.mp3`, `.jpg`, `.png`, etc.    |
-| Web          | URLs / web pages                        |
-| Databases    | SQL-based (e.g., SQLite, MySQL, etc.)   |
+| Category      | Supported Formats |
+|---------------|-------------------|
+| **Documents**     | `.pdf`, `.docx`, `.txt`, `.md` |
+| **Spreadsheets**  | `.csv`, `.xlsx` |
+| **Presentations** | `.pptx` |
+| **Images**        | `.jpg`, `.jpeg`, `.png`, `.webp`, `.svg` |
+| **Audio**         | `.wav`, `.mp3`, `.aac`, `.ogg`, `.flac`, `.mpeg`, `.aiff` |
+| **Video**         | `.mp4`, `.webm`, `.wmv`, `.flv`, `.mov`, `.3gpp`, etc. |
+| **Web Pages**     | Raw URLs, HTML files |
+| **YouTube**       | Video links (summarize transcripts) |
+| **Databases**     | SQL (MySQL, PostgreSQL, SQLite), etc
+
+---
+
+## 🖼️ Screenshots
+
+### 🏠 Landing Page
+![Landing Page](./screenshots/image1.png)
+![Landing Page](./screenshots/image2.png)
+![Landing Page](./screenshots/image3.png)
+
+### 📁 Create Flow & Add Sources
+![Add Sources](./screenshots/image4.png)
+![Add Sources](./screenshots/image5.png)
+![Add Sources](./screenshots/image6.png)
+
+### 👤 Choose Agent / Persona
+![Choose Agent](./screenshots/image7.png)
+
+### 🤖 Follow-Up Questions & AI Responses
+![Follow-Up Questions](./screenshots/image8.png)
+![Follow-Up Questions](./screenshots/image9.png)
+
+### ❓ Custom Q&A Interface
+![Custom Questions](./screenshots/image10.png)
+![Custom Questions](./screenshots/image11.png)
+
+### ➕ Add More Sources & Continue Flow
+![More Sources](./screenshots/image12.png)
+![More Sources](./screenshots/image13.png)
+![More Sources](./screenshots/image14.png)
+![More Sources](./screenshots/image15.png)
+
+### 🔁 Ask Questions on Previous Responses
+![Follow-up on Previous Nodes](./screenshots/image16.png)
+![Follow-up on Previous Nodes](./screenshots/image17.png)
+
+### 🧩 Visualize Complete Mind Map Flow
+![Full Mind Map Flow](./screenshots/image18.png)
+
+### 🧾 Summarize Complete Flow
+![Flow Summary](./screenshots/image19.png)
+![Flow Summary](./screenshots/image20.png)
+
+### ⚡ Auto Mind Map from PDFs, Videos, and More
+![Auto Mind Mapping](./screenshots/image21.png)
+![Auto Mind Mapping](./screenshots/image22.png)
+![Auto Mind Mapping](./screenshots/image23.png)
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: ReactJS, Tailwind CSS *(optional)*
-- **Backend**: FastAPI
-- **AI Models**: OpenAI, Google Gemini
-- **Vector DB**: ChromaDB *(or other configurable vector store)*
-- **Storage**: Local or Cloud (based on setup)
+| Layer        | Tech |
+|--------------|------|
+| **Frontend** | ReactJS, Tailwind CSS (optional) |
+| **Backend**  | FastAPI (Python) |
+| **AI Models**| OpenAI GPT-4o, Google Gemini Pro |
+| **Storage**  | Local File System, AWS S3 |
+| **Database** | MongoDB |
+| **Vector Store** | ChromaDB (configurable) |
 
 ---
 
-## 📦 Setup Instructions
+## ⚙️ Setup Instructions
 
-### 1. Clone the repository
+### 🔁 Clone the Repository
 
 ```bash
 git clone https://github.com/NextGenAILabs/GenAIMindMapFlowBuilder.git
 cd GenAIMindMapFlowBuilder
 ```
 
-### 2. Backend Setup (FastAPI)
+### 🔧 Backend Setup (FastAPI + Poetry)
 
 ```bash
 cd backend
-python -m venv venv
-venv\Scripts\activate  # On Windows
-# or
-source venv/bin/activate  # On macOS/Linux
+python -m venv .venv
+source .venv/bin/activate  # or .venv\Scripts\activate (Windows)
 
-pip install -r requirements.txt
-uvicorn app:app
+pip install poetry
+poetry install
+uvicorn app:app --reload
 ```
 
-### 3. Frontend Setup (ReactJS)
+### 💻 Frontend Setup (React)
 
 ```bash
 cd frontend
 npm install
-npm start
+npm run dev
 ```
-
----
-
-## 🧪 Example Use Case
-
-1. Upload a PDF or connect a database  
-2. The system extracts and analyzes content  
-3. A mind map is generated showing key concepts and how they're related  
-
----
-
-## 🤖 AI Integration
-
-- **OpenAI API**: For language understanding, summarization, and structuring  
-- **Google Gemini**: For advanced reasoning and multimodal inputs  
-
-> ⚠️ API keys are required and should be added to your `.env` file.
 
 ---
 
 ## 🔐 Environment Variables
 
-Create a `.env` file in the `backend/` directory with the following keys:
+Create a `.env` file inside the `backend/` folder:
 
 ```env
 # .env
-
 mongo_db_url=
 openai_api_key=
 gemini_api_key=
-gcp_project_id=
 aws_access_key_id=
 aws_secret_access_key=
 bucket_name=
 ```
 
-> **Note**: Replace the placeholder values with your actual API keys and credentials.
+> Replace values with actual credentials.
 
 ---
 
+## 🧪 Example Workflow
+
+1. Upload a `.pdf`, connect a SQL database, or paste a URL
+2. AI reads and summarizes data
+3. System builds a visual mind map
+4. Ask follow-ups, skip them, or ask custom questions
+5. Explore answers (text + table + graph)
+6. Export final report as a shareable PDF
+
+---
+
+## 🤖 AI Integration Details
+
+| Model          | Purpose |
+|----------------|---------|
+| **OpenAI GPT-4o** | NLP, summarization, Q&A, flow generation |
+| **Google Gemini Pro** | Multimodal input (text, image, video), deeper analysis |
+
+---
 
 ## 🙌 Acknowledgments
 
@@ -119,10 +204,20 @@ bucket_name=
 - [ReactJS](https://reactjs.org/)
 - [OpenAI](https://openai.com/)
 - [Google Gemini](https://deepmind.google/technologies/gemini)
+- [MongoDB](https://www.mongodb.com/)
 
 ---
 
-## ✨ Contributions Welcome!
+## 💡 Inspirations
 
-Feel free to fork the repo, open issues, or create PRs.  
-Let’s build the future of intelligent knowledge visualization together!
+- [NotebookLM (Google)](https://notebooklm.google/)
+- [Obsidian Mind Map Plugin](https://obsidian.md/)
+- [Miro](https://miro.com/)
+- [Whimsical](https://whimsical.com/)
+- [Notion AI](https://www.notion.so/product/ai)
+
+---
+
+## 📬 Contact
+
+📧 **Email**: [nextgenailabs99@gmail.com](mailto:nextgenailabs99@gmail.com)
