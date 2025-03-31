@@ -2,38 +2,38 @@
 
 **GenAI Mind Map Flow Builder** is a cutting-edge, AI-powered tool designed to convert complex, multi-format data into structured, interactive mind maps. Powered by LLMs like OpenAI GPT-4o and Google Gemini, it allows users to process, query, visualize, and summarize knowledge extracted from diverse sources.
 
-📺 [Watch Demo on YouTube](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
-
+## 📺 Watch Demo on YouTube
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/sxvKbQI7Wl0/0.jpg)](https://youtu.be/sxvKbQI7Wl0)
 ---
 
 ## 🚀 Key Features
 
 ### 🔗 **Multi-Source Data Integration**
 - Upload or connect multiple data sources including:
-  - Documents, spreadsheets, web pages, databases, images, audio, and video
+  - Documents, csv, web pages, databases, images, audio, and video
 - Add unlimited data sources in one flow
 - Reuse and interlink previous answers
 
 ### 🧠 **AI-Powered Mind Map Generation**
 - Uses OpenAI GPT-4o and Google Gemini to:
-  - Summarize uploaded/connected content
+  - Summarize uploaded/connected content with dataframe and graph visualization
   - Extract relationships and concepts
   - Generate mind maps automatically
 
 ### 🧭 **Two Mind Map Modes**
 - **Automatic Mode**:
-  - Upload one source
-  - Mind map and summaries are auto-generated
+  - Upload any one source
+  - Mind map and summaries are auto-generated with dataframe and graph visualization
 - **Manual Mode**:
-  - Upload/connect multiple sources
-  - AI asks follow-up questions based on context
+  - Upload/connect multiple sources as you can
+  - AI suggests follow-up questions based on context
   - You can:
-    - Answer follow-ups
+    - Ask Answers on follow-up questions
     - Skip them
     - Ask your own questions
   - AI replies in a 3-part format:
     1. 🧾 **Answer**
-    2. 📊 **Data Table (DataFrame)**
+    2. 📊 **Data Table / DataFrame (if applicable)**
     3. 🌐 **Graph (if applicable)**
 
 ### 🔁 **Cross-Source Questioning**
@@ -43,7 +43,7 @@
 - Link insights between different data nodes
 
 ### 📚 **Mind Map to Report**
-- Export entire flow as an AI-generated structured PDF report
+- Export entire flow as an AI-generated structured PDF report (Insights will be generated)
 - Auto-capture questions, answers, tables, graphs, and source traceability
 
 ### 📤 **Export Options**
@@ -58,13 +58,13 @@
 | Category      | Supported Formats |
 |---------------|-------------------|
 | **Documents**     | `.pdf`, `.docx`, `.txt`, `.md` |
-| **Spreadsheets**  | `.csv`, `.xlsx` |
+| **Spreadsheets**  | `.csv` |
 | **Presentations** | `.pptx` |
 | **Images**        | `.jpg`, `.jpeg`, `.png`, `.webp`, `.svg` |
 | **Audio**         | `.wav`, `.mp3`, `.aac`, `.ogg`, `.flac`, `.mpeg`, `.aiff` |
 | **Video**         | `.mp4`, `.webm`, `.wmv`, `.flv`, `.mov`, `.3gpp`, etc. |
-| **Web Pages**     | Raw URLs, HTML files |
-| **YouTube**       | Video links (summarize transcripts) |
+| **Web Pages**     | Web URLs, HTML files |
+| **YouTube**       | Public YouTube Video links|
 | **Databases**     | SQL (MySQL, PostgreSQL, SQLite), etc
 
 ---
@@ -221,3 +221,4 @@ bucket_name=
 ## 📬 Contact
 
 📧 **Email**: [nextgenailabs99@gmail.com](mailto:nextgenailabs99@gmail.com)
+
