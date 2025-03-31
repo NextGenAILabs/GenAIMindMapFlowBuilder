@@ -16,21 +16,22 @@
 
 ### 🧠 **AI-Powered Mind Map Generation**
 - Uses OpenAI GPT-4o and Google Gemini to:
-  - Summarize uploaded/connected content with dataframe and graph visualization
-  - Extract relationships and concepts
-  - Generate mind maps automatically
+  - Extract data insights and visualize them with graph and dataframes (tables)
+  - Ask multiple questions on multiple data sources
+  - Generate mind maps automatically for single data source
+  - Prepare PDF Report for the entire flow
 
 ### 🧭 **Two Mind Map Modes**
 - **Automatic Mode**:
   - Upload any one source
-  - Mind map and summaries are auto-generated with dataframe and graph visualization
+  - Mind map and summaries are auto-generated with dataframes and graph visualization
 - **Manual Mode**:
   - Upload/connect multiple sources as you can
   - AI suggests follow-up questions based on context
   - You can:
     - Ask Answers on follow-up questions
-    - Skip them
     - Ask your own questions
+    - Generate PDF report
   - AI replies in a 3-part format:
     1. 🧾 **Answer**
     2. 📊 **Data Table / DataFrame (if applicable)**
@@ -120,11 +121,11 @@
 
 | Layer        | Tech |
 |--------------|------|
-| **Frontend** | ReactJS, Tailwind CSS (optional) |
+| **Frontend** | ReactJS, CSS |
 | **Backend**  | FastAPI (Python) |
 | **AI Models**| OpenAI GPT-4o, Google Gemini Pro |
 | **Storage**  | Local File System, AWS S3 |
-| **Database** | MongoDB |
+| **Database** | MongoDB, SQLite |
 | **Vector Store** | ChromaDB (configurable) |
 
 ---
@@ -195,16 +196,6 @@ bucket_name=
 |----------------|---------|
 | **OpenAI GPT-4o** | NLP, summarization, Q&A, flow generation |
 | **Google Gemini Pro** | Multimodal input (text, image, video), deeper analysis |
-
----
-
-## 🙌 Acknowledgments
-
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [ReactJS](https://reactjs.org/)
-- [OpenAI](https://openai.com/)
-- [Google Gemini](https://deepmind.google/technologies/gemini)
-- [MongoDB](https://www.mongodb.com/)
 
 ---
 
